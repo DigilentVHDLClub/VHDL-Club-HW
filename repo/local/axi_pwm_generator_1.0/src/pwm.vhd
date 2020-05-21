@@ -77,11 +77,11 @@ begin
 end process;
 
 --connect the ILA instance into the system
-analyzer1: ila_0 port map (clk=>ck,
-                           probe0=>ckpwm_vector,
-                           probe1=>pwm_temp,
-                           probe2=>Nfckpwm_set,
-                           probe3=>duty_set);
+--analyzer1: ila_0 port map (clk=>ck,
+--                           probe0=>ckpwm_vector,
+--                           probe1=>pwm_temp,
+--                           probe2=>Nfckpwm_set,
+--                           probe3=>duty_set);
 
 -- assign the temporary PWM variable to the actual output port
 pwm_out <= pwm_temp;
