@@ -143,9 +143,9 @@ set_property -dict { PACKAGE_PIN J14   IOSTANDARD LVCMOS33 } [get_ports { LED_tr
 set_property -dict { PACKAGE_PIN K14   IOSTANDARD LVCMOS33 } [get_ports { LED_tri_o[1] }]; #IO_L11P_AD1P_46/26 Sch=ld[2]
 set_property -dict { PACKAGE_PIN L13   IOSTANDARD LVCMOS33 } [get_ports { LED_tri_o[2] }]; #IO_L12N_AD0N_46/26 Sch=ld[3]
 set_property -dict { PACKAGE_PIN L14   IOSTANDARD LVCMOS33 } [get_ports { LED_tri_o[3] }]; #IO_L12P_AD0P_46/26 Sch=ld[4]
-#set_property -dict { PACKAGE_PIN A8  IOSTANDARD LVCMOS12 } [get_ports { LED[0] }]; #IO_L23N_T3U_N9_66 Sch=ld5_b
-#set_property -dict { PACKAGE_PIN B9  IOSTANDARD LVCMOS12 } [get_ports { LED[1] }]; #IO_L24N_T3U_N11_66 Sch=ld5_g
-set_property -dict { PACKAGE_PIN C9   IOSTANDARD LVCMOS12 } [get_ports { pwm_out_0[0] }]; #IO_L24P_T3U_N10_66 Sch=ld5_r
+set_property -dict { PACKAGE_PIN A8  IOSTANDARD LVCMOS12 } [get_ports { pwm_out_b[0] }]; #IO_L23N_T3U_N9_66 Sch=ld5_b
+set_property -dict { PACKAGE_PIN B9  IOSTANDARD LVCMOS12 } [get_ports { pwm_out_g[0] }]; #IO_L24N_T3U_N11_66 Sch=ld5_g
+set_property -dict { PACKAGE_PIN C9  IOSTANDARD LVCMOS12 } [get_ports { pwm_out_r[0] }]; #IO_L24P_T3U_N10_66 Sch=ld5_r
 #set_property -dict { PACKAGE_PIN F1    IOSTANDARD LVDS     } [get_ports { MIPI_A_CLK_N }]; #IO_L1N_T0L_N1_DBC_66 Sch=mipi_a_clk_n
 #set_property -dict { PACKAGE_PIN G1    IOSTANDARD LVDS     } [get_ports { MIPI_A_CLK_P }]; #IO_L1P_T0L_N0_DBC_66 Sch=mipi_a_clk_p
 #set_property -dict { PACKAGE_PIN D1    IOSTANDARD LVDS     } [get_ports { MIPI_A_LANE_N[0] }]; #IO_L2N_T0L_N3_66 Sch=mipi_a_lane_n[0]

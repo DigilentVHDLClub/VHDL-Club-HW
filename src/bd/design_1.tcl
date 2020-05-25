@@ -199,7 +199,9 @@ proc create_root_design { parentCell } {
 
 
   # Create ports
-  set pwm_out_0 [ create_bd_port -dir O -from 0 -to 0 pwm_out_0 ]
+  set pwm_out_b [ create_bd_port -dir O -from 0 -to 0 pwm_out_b ]
+  set pwm_out_g [ create_bd_port -dir O -from 0 -to 0 pwm_out_g ]
+  set pwm_out_r [ create_bd_port -dir O -from 0 -to 0 pwm_out_r ]
 
   # Create instance: axi_gpio_0, and set properties
   set axi_gpio_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_0 ]
@@ -218,13 +220,28 @@ proc create_root_design { parentCell } {
    CONFIG.C_GPIO_WIDTH {4} \
  ] $axi_gpio_1
 
-  # Create instance: axi_pwm_generator_0, and set properties
-  set axi_pwm_generator_0 [ create_bd_cell -type ip -vlnv xilinx.com:user:axi_pwm_generator:1.0 axi_pwm_generator_0 ]
+  # Create instance: axi_pwm_generator_b, and set properties
+  set axi_pwm_generator_b [ create_bd_cell -type ip -vlnv xilinx.com:user:axi_pwm_generator:1.0 axi_pwm_generator_b ]
+  set_property -dict [ list \
+   CONFIG.k_Axi_Freq_IN_Hz {50000000} \
+ ] $axi_pwm_generator_b
+
+  # Create instance: axi_pwm_generator_g, and set properties
+  set axi_pwm_generator_g [ create_bd_cell -type ip -vlnv xilinx.com:user:axi_pwm_generator:1.0 axi_pwm_generator_g ]
+  set_property -dict [ list \
+   CONFIG.k_Axi_Freq_IN_Hz {50000000} \
+ ] $axi_pwm_generator_g
+
+  # Create instance: axi_pwm_generator_r, and set properties
+  set axi_pwm_generator_r [ create_bd_cell -type ip -vlnv xilinx.com:user:axi_pwm_generator:1.0 axi_pwm_generator_r ]
+  set_property -dict [ list \
+   CONFIG.k_Axi_Freq_IN_Hz {50000000} \
+ ] $axi_pwm_generator_r
 
   # Create instance: ps8_0_axi_periph, and set properties
   set ps8_0_axi_periph [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 ps8_0_axi_periph ]
   set_property -dict [ list \
-   CONFIG.NUM_MI {3} \
+   CONFIG.NUM_MI {5} \
  ] $ps8_0_axi_periph
 
   # Create instance: rst_ps8_0_50M, and set properties
@@ -1799,21 +1816,27 @@ proc create_root_design { parentCell } {
 connect_bd_intf_net -intf_net [get_bd_intf_nets ps8_0_axi_periph_M00_AXI] [get_bd_intf_pins ps8_0_axi_periph/M00_AXI] [get_bd_intf_pins system_ila_0/SLOT_0_AXI]
   set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_intf_nets ps8_0_axi_periph_M00_AXI]
   connect_bd_intf_net -intf_net ps8_0_axi_periph_M01_AXI [get_bd_intf_pins axi_gpio_1/S_AXI] [get_bd_intf_pins ps8_0_axi_periph/M01_AXI]
-  connect_bd_intf_net -intf_net ps8_0_axi_periph_M02_AXI [get_bd_intf_pins axi_pwm_generator_0/S00_AXI] [get_bd_intf_pins ps8_0_axi_periph/M02_AXI]
+  connect_bd_intf_net -intf_net ps8_0_axi_periph_M02_AXI [get_bd_intf_pins axi_pwm_generator_r/S00_AXI] [get_bd_intf_pins ps8_0_axi_periph/M02_AXI]
 connect_bd_intf_net -intf_net [get_bd_intf_nets ps8_0_axi_periph_M02_AXI] [get_bd_intf_pins ps8_0_axi_periph/M02_AXI] [get_bd_intf_pins system_ila_0/SLOT_1_AXI]
   set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_intf_nets ps8_0_axi_periph_M02_AXI]
+  connect_bd_intf_net -intf_net ps8_0_axi_periph_M03_AXI [get_bd_intf_pins axi_pwm_generator_g/S00_AXI] [get_bd_intf_pins ps8_0_axi_periph/M03_AXI]
+  connect_bd_intf_net -intf_net ps8_0_axi_periph_M04_AXI [get_bd_intf_pins axi_pwm_generator_b/S00_AXI] [get_bd_intf_pins ps8_0_axi_periph/M04_AXI]
   connect_bd_intf_net -intf_net zynq_ultra_ps_e_0_M_AXI_HPM0_LPD [get_bd_intf_pins ps8_0_axi_periph/S00_AXI] [get_bd_intf_pins zynq_ultra_ps_e_0/M_AXI_HPM0_LPD]
 
   # Create port connections
-  connect_bd_net -net axi_pwm_generator_0_pwm_out [get_bd_ports pwm_out_0] [get_bd_pins axi_pwm_generator_0/pwm_out]
-  connect_bd_net -net rst_ps8_0_50M_peripheral_aresetn [get_bd_pins axi_gpio_0/s_axi_aresetn] [get_bd_pins axi_gpio_1/s_axi_aresetn] [get_bd_pins axi_pwm_generator_0/s00_axi_aresetn] [get_bd_pins ps8_0_axi_periph/ARESETN] [get_bd_pins ps8_0_axi_periph/M00_ARESETN] [get_bd_pins ps8_0_axi_periph/M01_ARESETN] [get_bd_pins ps8_0_axi_periph/M02_ARESETN] [get_bd_pins ps8_0_axi_periph/S00_ARESETN] [get_bd_pins rst_ps8_0_50M/peripheral_aresetn] [get_bd_pins system_ila_0/resetn]
-  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins axi_gpio_0/s_axi_aclk] [get_bd_pins axi_gpio_1/s_axi_aclk] [get_bd_pins axi_pwm_generator_0/s00_axi_aclk] [get_bd_pins ps8_0_axi_periph/ACLK] [get_bd_pins ps8_0_axi_periph/M00_ACLK] [get_bd_pins ps8_0_axi_periph/M01_ACLK] [get_bd_pins ps8_0_axi_periph/M02_ACLK] [get_bd_pins ps8_0_axi_periph/S00_ACLK] [get_bd_pins rst_ps8_0_50M/slowest_sync_clk] [get_bd_pins system_ila_0/clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_lpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/pl_clk0]
+  connect_bd_net -net axi_pwm_generator_0_pwm_out [get_bd_ports pwm_out_r] [get_bd_pins axi_pwm_generator_r/pwm_out]
+  connect_bd_net -net axi_pwm_generator_1_pwm_out [get_bd_ports pwm_out_g] [get_bd_pins axi_pwm_generator_g/pwm_out]
+  connect_bd_net -net axi_pwm_generator_2_pwm_out [get_bd_ports pwm_out_b] [get_bd_pins axi_pwm_generator_b/pwm_out]
+  connect_bd_net -net rst_ps8_0_50M_peripheral_aresetn [get_bd_pins axi_gpio_0/s_axi_aresetn] [get_bd_pins axi_gpio_1/s_axi_aresetn] [get_bd_pins axi_pwm_generator_b/s00_axi_aresetn] [get_bd_pins axi_pwm_generator_g/s00_axi_aresetn] [get_bd_pins axi_pwm_generator_r/s00_axi_aresetn] [get_bd_pins ps8_0_axi_periph/ARESETN] [get_bd_pins ps8_0_axi_periph/M00_ARESETN] [get_bd_pins ps8_0_axi_periph/M01_ARESETN] [get_bd_pins ps8_0_axi_periph/M02_ARESETN] [get_bd_pins ps8_0_axi_periph/M03_ARESETN] [get_bd_pins ps8_0_axi_periph/M04_ARESETN] [get_bd_pins ps8_0_axi_periph/S00_ARESETN] [get_bd_pins rst_ps8_0_50M/peripheral_aresetn] [get_bd_pins system_ila_0/resetn]
+  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins axi_gpio_0/s_axi_aclk] [get_bd_pins axi_gpio_1/s_axi_aclk] [get_bd_pins axi_pwm_generator_b/s00_axi_aclk] [get_bd_pins axi_pwm_generator_g/s00_axi_aclk] [get_bd_pins axi_pwm_generator_r/s00_axi_aclk] [get_bd_pins ps8_0_axi_periph/ACLK] [get_bd_pins ps8_0_axi_periph/M00_ACLK] [get_bd_pins ps8_0_axi_periph/M01_ACLK] [get_bd_pins ps8_0_axi_periph/M02_ACLK] [get_bd_pins ps8_0_axi_periph/M03_ACLK] [get_bd_pins ps8_0_axi_periph/M04_ACLK] [get_bd_pins ps8_0_axi_periph/S00_ACLK] [get_bd_pins rst_ps8_0_50M/slowest_sync_clk] [get_bd_pins system_ila_0/clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_lpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/pl_clk0]
   connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins rst_ps8_0_50M/ext_reset_in] [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0]
 
   # Create address segments
   create_bd_addr_seg -range 0x00001000 -offset 0x80000000 [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs axi_gpio_0/S_AXI/Reg] SEG_axi_gpio_0_Reg
   create_bd_addr_seg -range 0x00001000 -offset 0x80001000 [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs axi_gpio_1/S_AXI/Reg] SEG_axi_gpio_1_Reg
-  create_bd_addr_seg -range 0x00001000 -offset 0x80002000 [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs axi_pwm_generator_0/S00_AXI/S00_AXI_reg] SEG_axi_pwm_generator_0_S00_AXI_reg
+  create_bd_addr_seg -range 0x00001000 -offset 0x80002000 [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs axi_pwm_generator_r/S00_AXI/S00_AXI_reg] SEG_axi_pwm_generator_0_S00_AXI_reg
+  create_bd_addr_seg -range 0x00001000 -offset 0x80003000 [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs axi_pwm_generator_g/S00_AXI/S00_AXI_reg] SEG_axi_pwm_generator_1_S00_AXI_reg
+  create_bd_addr_seg -range 0x00001000 -offset 0x80004000 [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs axi_pwm_generator_b/S00_AXI/S00_AXI_reg] SEG_axi_pwm_generator_2_S00_AXI_reg
 
 
   # Restore current instance
