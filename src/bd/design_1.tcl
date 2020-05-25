@@ -124,6 +124,7 @@ set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
 xilinx.com:ip:axi_gpio:2.0\
+xilinx.com:user:axi_pwm_generator:1.0\
 xilinx.com:ip:proc_sys_reset:5.0\
 xilinx.com:ip:system_ila:1.1\
 xilinx.com:ip:zynq_ultra_ps_e:3.3\
@@ -198,6 +199,7 @@ proc create_root_design { parentCell } {
 
 
   # Create ports
+  set pwm_out_0 [ create_bd_port -dir O -from 0 -to 0 pwm_out_0 ]
 
   # Create instance: axi_gpio_0, and set properties
   set axi_gpio_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_0 ]
@@ -216,10 +218,13 @@ proc create_root_design { parentCell } {
    CONFIG.C_GPIO_WIDTH {4} \
  ] $axi_gpio_1
 
+  # Create instance: axi_pwm_generator_0, and set properties
+  set axi_pwm_generator_0 [ create_bd_cell -type ip -vlnv xilinx.com:user:axi_pwm_generator:1.0 axi_pwm_generator_0 ]
+
   # Create instance: ps8_0_axi_periph, and set properties
   set ps8_0_axi_periph [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 ps8_0_axi_periph ]
   set_property -dict [ list \
-   CONFIG.NUM_MI {2} \
+   CONFIG.NUM_MI {3} \
  ] $ps8_0_axi_periph
 
   # Create instance: rst_ps8_0_50M, and set properties
@@ -229,7 +234,7 @@ proc create_root_design { parentCell } {
   set system_ila_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:system_ila:1.1 system_ila_0 ]
   set_property -dict [ list \
    CONFIG.C_MON_TYPE {INTERFACE} \
-   CONFIG.C_NUM_MONITOR_SLOTS {1} \
+   CONFIG.C_NUM_MONITOR_SLOTS {2} \
    CONFIG.C_SLOT_0_APC_EN {0} \
    CONFIG.C_SLOT_0_AXI_AR_SEL_DATA {1} \
    CONFIG.C_SLOT_0_AXI_AR_SEL_TRIG {1} \
@@ -242,6 +247,18 @@ proc create_root_design { parentCell } {
    CONFIG.C_SLOT_0_AXI_W_SEL_DATA {1} \
    CONFIG.C_SLOT_0_AXI_W_SEL_TRIG {1} \
    CONFIG.C_SLOT_0_INTF_TYPE {xilinx.com:interface:aximm_rtl:1.0} \
+   CONFIG.C_SLOT_1_APC_EN {0} \
+   CONFIG.C_SLOT_1_AXI_AR_SEL_DATA {1} \
+   CONFIG.C_SLOT_1_AXI_AR_SEL_TRIG {1} \
+   CONFIG.C_SLOT_1_AXI_AW_SEL_DATA {1} \
+   CONFIG.C_SLOT_1_AXI_AW_SEL_TRIG {1} \
+   CONFIG.C_SLOT_1_AXI_B_SEL_DATA {1} \
+   CONFIG.C_SLOT_1_AXI_B_SEL_TRIG {1} \
+   CONFIG.C_SLOT_1_AXI_R_SEL_DATA {1} \
+   CONFIG.C_SLOT_1_AXI_R_SEL_TRIG {1} \
+   CONFIG.C_SLOT_1_AXI_W_SEL_DATA {1} \
+   CONFIG.C_SLOT_1_AXI_W_SEL_TRIG {1} \
+   CONFIG.C_SLOT_1_INTF_TYPE {xilinx.com:interface:aximm_rtl:1.0} \
  ] $system_ila_0
 
   # Create instance: zynq_ultra_ps_e_0, and set properties
@@ -1782,16 +1799,21 @@ proc create_root_design { parentCell } {
 connect_bd_intf_net -intf_net [get_bd_intf_nets ps8_0_axi_periph_M00_AXI] [get_bd_intf_pins ps8_0_axi_periph/M00_AXI] [get_bd_intf_pins system_ila_0/SLOT_0_AXI]
   set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_intf_nets ps8_0_axi_periph_M00_AXI]
   connect_bd_intf_net -intf_net ps8_0_axi_periph_M01_AXI [get_bd_intf_pins axi_gpio_1/S_AXI] [get_bd_intf_pins ps8_0_axi_periph/M01_AXI]
+  connect_bd_intf_net -intf_net ps8_0_axi_periph_M02_AXI [get_bd_intf_pins axi_pwm_generator_0/S00_AXI] [get_bd_intf_pins ps8_0_axi_periph/M02_AXI]
+connect_bd_intf_net -intf_net [get_bd_intf_nets ps8_0_axi_periph_M02_AXI] [get_bd_intf_pins ps8_0_axi_periph/M02_AXI] [get_bd_intf_pins system_ila_0/SLOT_1_AXI]
+  set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_intf_nets ps8_0_axi_periph_M02_AXI]
   connect_bd_intf_net -intf_net zynq_ultra_ps_e_0_M_AXI_HPM0_LPD [get_bd_intf_pins ps8_0_axi_periph/S00_AXI] [get_bd_intf_pins zynq_ultra_ps_e_0/M_AXI_HPM0_LPD]
 
   # Create port connections
-  connect_bd_net -net rst_ps8_0_50M_peripheral_aresetn [get_bd_pins axi_gpio_0/s_axi_aresetn] [get_bd_pins axi_gpio_1/s_axi_aresetn] [get_bd_pins ps8_0_axi_periph/ARESETN] [get_bd_pins ps8_0_axi_periph/M00_ARESETN] [get_bd_pins ps8_0_axi_periph/M01_ARESETN] [get_bd_pins ps8_0_axi_periph/S00_ARESETN] [get_bd_pins rst_ps8_0_50M/peripheral_aresetn] [get_bd_pins system_ila_0/resetn]
-  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins axi_gpio_0/s_axi_aclk] [get_bd_pins axi_gpio_1/s_axi_aclk] [get_bd_pins ps8_0_axi_periph/ACLK] [get_bd_pins ps8_0_axi_periph/M00_ACLK] [get_bd_pins ps8_0_axi_periph/M01_ACLK] [get_bd_pins ps8_0_axi_periph/S00_ACLK] [get_bd_pins rst_ps8_0_50M/slowest_sync_clk] [get_bd_pins system_ila_0/clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_lpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/pl_clk0]
+  connect_bd_net -net axi_pwm_generator_0_pwm_out [get_bd_ports pwm_out_0] [get_bd_pins axi_pwm_generator_0/pwm_out]
+  connect_bd_net -net rst_ps8_0_50M_peripheral_aresetn [get_bd_pins axi_gpio_0/s_axi_aresetn] [get_bd_pins axi_gpio_1/s_axi_aresetn] [get_bd_pins axi_pwm_generator_0/s00_axi_aresetn] [get_bd_pins ps8_0_axi_periph/ARESETN] [get_bd_pins ps8_0_axi_periph/M00_ARESETN] [get_bd_pins ps8_0_axi_periph/M01_ARESETN] [get_bd_pins ps8_0_axi_periph/M02_ARESETN] [get_bd_pins ps8_0_axi_periph/S00_ARESETN] [get_bd_pins rst_ps8_0_50M/peripheral_aresetn] [get_bd_pins system_ila_0/resetn]
+  connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins axi_gpio_0/s_axi_aclk] [get_bd_pins axi_gpio_1/s_axi_aclk] [get_bd_pins axi_pwm_generator_0/s00_axi_aclk] [get_bd_pins ps8_0_axi_periph/ACLK] [get_bd_pins ps8_0_axi_periph/M00_ACLK] [get_bd_pins ps8_0_axi_periph/M01_ACLK] [get_bd_pins ps8_0_axi_periph/M02_ACLK] [get_bd_pins ps8_0_axi_periph/S00_ACLK] [get_bd_pins rst_ps8_0_50M/slowest_sync_clk] [get_bd_pins system_ila_0/clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_lpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/pl_clk0]
   connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins rst_ps8_0_50M/ext_reset_in] [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0]
 
   # Create address segments
   create_bd_addr_seg -range 0x00001000 -offset 0x80000000 [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs axi_gpio_0/S_AXI/Reg] SEG_axi_gpio_0_Reg
   create_bd_addr_seg -range 0x00001000 -offset 0x80001000 [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs axi_gpio_1/S_AXI/Reg] SEG_axi_gpio_1_Reg
+  create_bd_addr_seg -range 0x00001000 -offset 0x80002000 [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] [get_bd_addr_segs axi_pwm_generator_0/S00_AXI/S00_AXI_reg] SEG_axi_pwm_generator_0_S00_AXI_reg
 
 
   # Restore current instance
